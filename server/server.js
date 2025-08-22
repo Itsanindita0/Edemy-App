@@ -1,29 +1,33 @@
-import express from 'express'
-import cors from 'cors'
-import 'dotenv/config'
-import connectDB from './configs/mongodb.js'
-import { ClerkWebhooks } from './controllers/webhooks.js'
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import connectDB from "./configs/mongodb.js";
+import { ClerkWebhooks } from "./controllers/webhooks.js";
+import bodyParser from "body-parser";
 
-//Initialize Express
-const app = express()
+// Initialize Express
+const app = express();
 
+// Connect to database
+await connectDB();
 
-//connect to database
-await connectDB()
-
-//Middlewares
-app.use(cors())
-
+// Middlewares
+app.use(cors());
 
 // Routes
-app.get('/', (req,res) => res.send("API Working"))
-app.post('/clerk',express.json(), ClerkWebhooks)
+app.get("/", (req, res) => res.send("API Working"));
 
-//port 
-const PORT = process.env.PORT || 5000
+// Clerk requires raw body for signature verification
+app.post(
+  "/clerk",
+  bodyParser.raw({ type: "application/json" }),
+  ClerkWebhooks
+);
 
-// run the application for port number
- app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    
- })
+// Port
+const PORT = process.env.PORT || 5000;
+
+// Run the application on the port
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}`);
+});
